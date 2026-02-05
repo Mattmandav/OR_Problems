@@ -1,11 +1,12 @@
 [project]
-name = "geometric-median"
+name = "optimization_problems"
 version = "0.1.0"
-description = "Add your description here"
+description = "Some optimisation problems implemented in Python and Gurobi"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "gurobipy>=13.0.1",
     "ipykernel>=7.1.0",
     "matplotlib>=3.10.8",
+    "networkx>=3.6.1",
 ]
