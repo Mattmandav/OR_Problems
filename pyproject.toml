@@ -5,6 +5,8 @@ description = "Some optimisation problems implemented in Python and Gurobi"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "cvxopt>=1.3.3",
+    "cvxpy>=1.8.1",
     "gurobipy>=13.0.1",
     "ipykernel>=7.1.0",
     "matplotlib>=3.10.8",
