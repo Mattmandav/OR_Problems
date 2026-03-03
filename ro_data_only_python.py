@@ -60,7 +60,9 @@ def sum_top_k_eigs(M, k):
 # 
 # $\text{diag}(A) \geq 0.02$
 # 
-# Interpretation: find the "most spread-out" PSD matrix on the trace-simplex (minimise concentration of variance in any $k$ directions).
+# ### Interpretation
+#
+# Find the "most spread-out" PSD matrix on the trace-simplex (minimise concentration of variance in any $k$ directions).
 
 # %%
 
