@@ -1,9 +1,28 @@
-# Required packages
+# %% [markdown]
+# # Classification - Separation problem
+#
+# ## Problem description
+# There are two sets of points $\{x_1,\dots,x_N\}$ and $\{y_1,\dots,y_M\}$. We would like to find a function, $f$, such that 
+#
+# $f(x_i) > 0, \quad \forall i = 1,\dots,N$
+#
+# $f(y_i) < 0, \quad \forall i = 1,\dots,M$
+#
+# ## Required packages
+
+# %%
 import random
 import numpy as np
 import gurobipy as gp
 import matplotlib.pyplot as plt
 
+
+# %% [markdown]
+# ## Data generation
+#
+# The following function generates two random sets of data. The number of points and the overlap of the two sets can be controlled.
+
+# %%
 # Generating points on unit square, separating around y = x
 def data_generation(
         number_of_points,
@@ -52,7 +71,11 @@ def data_generation(
     # Return points
     return X,Y
 
+
+# %% [markdown]
 # The following code previews the data
+
+# %%
 # Generate data
 number_of_points = 20
 maximum_overlap = 0.0
@@ -66,3 +89,23 @@ plt.plot([i for i in np.linspace(0,1,100)], [i for i in np.linspace(0,1,100)], '
 
 # Show the plot
 plt.show()
+
+# %% [markdown]
+# ## Linear discrimination main
+
+# %%
+
+# %% [markdown]
+# ## Linear discrimination alternative
+
+# %%
+
+# %% [markdown]
+# ## Robust linear discrimination
+
+# %%
+
+# %% [markdown]
+# ## Support vector classifier
+
+# %%

@@ -8,4 +8,11 @@ wheels/
 
 # Virtual environments
 .venv
-uv.lock
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Gurobi
+gurobi.log
+*.lp
+*.mps

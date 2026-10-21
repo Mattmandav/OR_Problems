@@ -1,11 +1,29 @@
-# Truss Topology Design: Minimum Compliance to SDP
+# %% [markdown]
+# # Truss Topology Design: Minimum Compliance to SDP
+#
+# ## Problem Setup
+#
+# A truss consists of:
+# - A set of **nodes** $V \subset \mathbb{R}^2$, some fixed and some free
+# - A set of **bars** $B$, each connecting two nodes
+# - A **load vector** $f \in \mathbb{R}^n$, where $n$ is the number of free degrees of freedom
+#
+# The **design variables** are the bar volumes $t_i \geq 0$ for $i = 1, \dots, m$,
+# subject to a total volume constraint $\sum_{i=1}^m t_i = V$.
+
+# %%
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import cvxpy as cp
 
+
+# %% [markdown]
 # The following code builds the 6-node toy truss from Ben-Tal & Nemirovski (1997), Figure 2.1.
+# The fixed nodes can be specified by a set and a load vector is given in the form `{(<node>,<"X" or "Y">,<load>)}`.
+
+# %%
 def build_toy_truss(
         fixed_nodes = set(),
         load_vector = set(),   
@@ -44,7 +62,11 @@ def build_toy_truss(
     # Return everything
     return load_vector, node_positions, fixed_nodes, free_nodes, all_bars, f, n_dof, free_node_dof_index
 
+
+# %% [markdown]
 # Function that can plot the ground structure with nodes, bars, and loads. If optimal bar volume is given then this is used to illustrate solution.
+
+# %%
 def plot_ground_structure(load_vector, node_positions, fixed_nodes, free_nodes, all_bars,
                           t_opt=None, tau_opt=None, threshold=1e-3, title_string = ""):
     G = nx.Graph()
@@ -141,15 +163,37 @@ def plot_ground_structure(load_vector, node_positions, fixed_nodes, free_nodes, 
     plt.tight_layout()
     plt.show()
 
+
+# %% [markdown]
 # Example from Ben-Tal & Nemirovski (1997)
 
+# %%
 [load_vector, node_positions, fixed_nodes, free_nodes, all_bars, f, n_dof, free_node_dof_index] = build_toy_truss(
     fixed_nodes={1,4}, 
     load_vector = {(5, "Y", 0.5), (6, "X", 0.5), (3, "Y", -0.5), (2, "X", -0.5)}
 )
 plot_ground_structure(load_vector, node_positions, fixed_nodes, free_nodes, all_bars, title_string = "Ben-Tal & Nemirovski (1997), Fig. 2.1")
 
-## Bar Stiffness Matrix
+
+# %% [markdown]
+# ## Bar Stiffness Matrix
+#
+# For bar $i$ connecting nodes $p$ and $q$ with positions $x_p, x_q \in \mathbb{R}^2$,
+# the unit direction vector is:
+#
+# $e_i = (x_q - x_p)/\|x_q - x_p\|$
+#
+# The bar force vector $b_i \in \mathbb{R}^n$ is assembled into the global DOF space as:
+#
+# $b_i = \frac{1}{L_i} \begin{cases} +e_i & \text{at DOFs of node } p \text{ (if free)} \\ -e_i & \text{at DOFs of node } q \text{ (if free)} \\ 0 & \text{at DOFs of fixed nodes} \end{cases}$
+#
+# where $L_i = \|x_q - x_p\|$ is the bar length. Each bar stiffness matrix is:
+#
+# $A_i = b_i b_i^T \in \mathbb{R}^{n \times n}$
+#
+# which is **rank-1 positive semidefinite** by construction.
+
+# %%
 def bar_stiffness_matrix(node_p, node_q, pos_p, pos_q, free_node_dof_index, n_dof):
     diff = pos_q - pos_p
     L = np.linalg.norm(diff)
@@ -180,7 +224,49 @@ def construct_bar_matrices(node_positions, all_bars, n_dof, free_node_dof_index)
         bar_matrices[(p, q)] = (A_i, b_i)
     return bar_matrices
 
-## SDP Formulation
+
+# %% [markdown]
+# ## Global Stiffness Matrix
+#
+# The global stiffness matrix is a weighted sum of bar stiffness matrices:
+#
+# $A(t) = \sum_{i=1}^m t_i A_i$
+#
+# Since each $A_i \succeq 0$ and $t_i \geq 0$, we have $A(t) \succeq 0$ for all feasible $t$.
+#
+# ## Minimum Compliance Problem
+#
+# Given load $f$ and total volume $V$, the **minimum compliance problem** is:
+#
+# $\min_{t} f^T A(t)^{-1} f$
+#
+# subject to
+#
+# $\sum_{i=1}^m t_i = V$
+#
+# $t_i \geq 0, \quad i = 1, \dots, m$
+#
+# The objective $f^T A(t)^{-1} f$ is the **compliance**. It measures the work done by
+# the load, or equivalently the inverse of the stiffness. A stiffer truss has lower compliance.
+#
+# This problem is **not** in a standard convex form because of the matrix inverse in the
+# objective.
+#
+# ## SDP Formulation
+#
+# $\min_{t,\ \tau} \tau$
+#
+# subject to
+#
+# $\begin{pmatrix} \tau & f^T \\ f & A(t) \end{pmatrix} \succeq 0$
+#
+# $\sum_{i=1}^m t_i = V$
+#
+# $t_i \geq 0, \quad i = 1, \dots, m$
+#
+# where $A(t) = \sum_{i=1}^m t_i A_i$ is linear in $t$.
+
+# %%
 def solve_truss_sdp(bar_matrices, f, n_dof, all_bars, fixed_nodes):
 
     """
@@ -193,7 +279,11 @@ def solve_truss_sdp(bar_matrices, f, n_dof, all_bars, fixed_nodes):
 
     return t_opt, tau_opt
 
-## Test problem from paper
+
+# %% [markdown]
+# ## Test problem from paper
+
+# %%
 # Input the problem from paper
 [load_vector, node_positions, fixed_nodes, free_nodes, all_bars, f, n_dof, free_node_dof_index] = build_toy_truss(
     fixed_nodes={1,4}, 
@@ -213,11 +303,9 @@ for (p, q), vol in sorted(t_opt.items(), key=lambda x: -x[1]):
         print(f"  Bar {p}-{q}: {vol:.4f}  ({100*vol:.2f}%)")
 plot_ground_structure(load_vector, node_positions, fixed_nodes, free_nodes, all_bars, t_opt=t_opt, tau_opt=tau_opt)
 
-
+# %%
 # Other interesting loads
 load_vector = {(5, "Y", 1), (6, "X", 1)}
 load_vector = {(5, "Y", -1), (6, "X", 1)}
 load_vector = {(5, "Y", -1), (6, "X", -1)}
 load_vector = {(5, "Y", -1), (6, "Y", -1)}
-
-

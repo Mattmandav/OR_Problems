@@ -1,0 +1,3 @@
+# Keep the paired workshop.py scripts free of notebook metadata noise
+notebook_metadata_filter = "-all"
+cell_metadata_filter = "-all"

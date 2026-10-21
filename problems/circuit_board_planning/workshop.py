@@ -1,5 +1,16 @@
-# Circuit board planning
-## Required packages
+# %% [markdown]
+# # Circuit board planning
+#
+# ## Problem description
+# A factory wishes to place $m$ chips onto a rectangular board. They wish to minimise the size of this board to minimise costs. $w_i$ represents the width of chip $i$ and $h_i$ represents the height of chip $i$.
+#
+# ## Problem formulation
+#
+# Problem formulation similar to floor planning problem.
+#
+# ## Required packages
+
+# %%
 import random
 import math
 import gurobipy as gp
@@ -7,6 +18,12 @@ import itertools
 import matplotlib.pyplot as plt
 import networkx as nx
 
+# %% [markdown]
+# ## Data generation
+#
+# The following code generates random "machines" (rectangular shapes). The value for `number_of_machines` can be changed. The value of `maximum_area` controls the area that machines can take, also bounding the lengths of the machines. The largest machine is a square with maximum area.
+
+# %%
 # The number of machines
 number_of_chips = 4
 maximum_area = 100
@@ -75,10 +92,14 @@ for nd in planar_layout:
         plane_scaling*(planar_layout[nd][1]+abs(smallest_negative)),
         )
 
-## Find the board that can fit all of the chips, without rotation, and adding all of the required traces
+# %% [markdown]
+# ## Problem without rotation
+#
+# Find the board that can fit all of the chips, without rotation, and adding all of the required traces
 
-## Plot the board layout
+# %%
 
+# %% [markdown]
+# ## Plot the board layout
 
-
-
+# %%

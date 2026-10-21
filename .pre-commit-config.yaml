@@ -1,0 +1,15 @@
+# Install once with: uv run pre-commit install
+repos:
+  # Strip outputs and execution counts from every notebook before commit
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.9.1
+    hooks:
+      - id: nbstripout
+
+  # Keep each workshop.py in sync with its workshop.ipynb (edit either one)
+  - repo: https://github.com/mwouts/jupytext
+    rev: v1.19.6
+    hooks:
+      - id: jupytext
+        args: [--sync]
+        files: ^problems/[^/]+/workshop\.(ipynb|py)$

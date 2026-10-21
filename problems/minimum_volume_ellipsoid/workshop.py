@@ -1,5 +1,29 @@
-## Minimum Volume Enclosing Ellipsoid (Löwner-John Ellipsoid)
-# Required packages
+# %% [markdown]
+# # Minimum Volume Enclosing Ellipsoid (Löwner-John Ellipsoid)
+#
+# ## Problem description
+#
+# Given a set of points $x_1, \dots, x_N \in \mathbb{R}^n$, find the **smallest volume ellipsoid** that contains all points.
+#
+# An ellipsoid centred at $c \in \mathbb{R}^n$ can be represented as:
+#
+# $\mathcal{E} = \{ x \in \mathbb{R}^n : (x - c)^T P^{-1} (x - c) \leq 1 \}$
+#
+# where $P \in \mathbb{S}^n_{++}$ is a **symmetric positive definite** matrix that determines the shape and orientation of the ellipsoid. 
+#
+# The semi-axes of $\mathcal{E}$ are the eigenvectors of $P$, with lengths given by the square roots of the corresponding eigenvalues.
+#
+# ## Volume of an Ellipsoid
+#
+# The volume of $\mathcal{E}$ is proportional to:
+#
+# $\text{Vol}(\mathcal{E}) \propto \sqrt{\det P} = \exp\left(\frac{1}{2} \log \det P\right)$
+#
+# Minimising the volume is therefore equivalent to minimising $\log \det P$, or equivalently **maximising** $\log \det P^{-1}$.
+#
+# ## Required packages
+
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -8,7 +32,11 @@ import cvxpy as cp
 import gurobipy as gp
 from scipy.optimize import minimize
 
+
+# %% [markdown]
 # The following code generates a number of points based on one of several ''modes''.
+
+# %%
 def generate_points(mode='clusters', n_points=30, seed=2026):
     """
     Generate interesting 2D point sets for the mve problem.
@@ -73,7 +101,10 @@ def generate_points(mode='clusters', n_points=30, seed=2026):
     return points
 
 
+# %% [markdown]
 # The following function plots the set of 2D points and optionally an ellipsoid found by the solver.
+
+# %%
 def plot_mve(points, P=None, c=None, title=None, ax=None):
     """
     Plot 2D points and optionally the enclosing ellipsoid.
@@ -146,17 +177,20 @@ def plot_mve(points, P=None, c=None, title=None, ax=None):
     return ax
 
 
-# Example code
+# %%
 modes = ['clusters', 'annulus', 'simplex', 'ellipse', 'cross']
 n = 40
 s = 2026
+
 # Setting up plot
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
+
 # Generating data
 for i, mode in enumerate(modes):
     points = generate_points(mode=mode, n_points=n, seed=s)
     plot_mve(points, title=f'Mode: {mode}', ax=axes[i])
+
 # Share common plot legend
 axes[-1].axis('off')
 handles, labels = axes[0].get_legend_handles_labels()
@@ -165,13 +199,41 @@ for ax in axes[:-1]:
 axes[-1].legend(handles, labels, fontsize=11, loc='center',
                 title='Legend', title_fontsize=12,
                 frameon=False)
+
 # Finalise plot
 plt.suptitle('Minimum Volume Enclosing Ellipsoid solved using CVXPY (SDP)', fontsize=13)
 plt.tight_layout()
 plt.show()
 
 
-# Function for solving mve
+# %% [markdown]
+# ## Standard Formulation
+#
+# $\min_{P,\ c} \quad \log \det P^{-1}$
+#
+# subject to
+#
+# $(x_i - c)^T P^{-1} (x_i - c) \leq 1, \quad i = 1, \dots, N$
+#
+# $P \succ 0$
+#
+# This is a **convex optimisation problem**: the objective $\log \det P^{-1}$ is convex in $P^{-1}$, and the constraints are convex in $(P, c)$. However, the decision variables appear nonlinearly, so we apply a change of variables to obtain a standard SDP.
+#
+# ## SDP Formulation
+#
+# $\max_{B,\ d} \quad \log \det B$
+#
+# subject to
+#
+# $\begin{pmatrix} 1 & (Bx_i + d)^T \\ Bx_i + d & I \end{pmatrix} \succeq 0, \quad i = 1, \dots, N$
+#
+# $B \succeq 0$
+#
+# The ellipsoid centre and matrix are then recovered as:
+#
+# $c = -B^{-1} d, \qquad P = B^{-T} B^{-1} = (B^T B)^{-1}$
+
+# %%
 def solve_mve_cvxpy(points):
     """
     Solve the mve problem in the SDP formulation using CVXPY.
@@ -189,18 +251,24 @@ def solve_mve_cvxpy(points):
     return P_opt, c_opt
 
 
+# %% [markdown]
 # The example code from above with the solver function applied in the middle.
+
+# %%
 modes = ['clusters', 'annulus', 'simplex', 'ellipse', 'cross']
 n = 40
 s = 2026
+
 # Setting up plot
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
+
 # Generating data
 for i, mode in enumerate(modes):
     points = generate_points(mode=mode, n_points=n, seed=s)
     P, c = solve_mve_cvxpy(points)
     plot_mve(points, P, c, title=f'Mode: {mode}', ax=axes[i])
+
 # Share common plot legend
 axes[-1].axis('off')
 handles, labels = axes[0].get_legend_handles_labels()
@@ -209,9 +277,8 @@ for ax in axes[:-1]:
 axes[-1].legend(handles, labels, fontsize=11, loc='center',
                 title='Legend', title_fontsize=12,
                 frameon=False)
+
 # Finalise plot
 plt.suptitle('Minimum Volume Enclosing Ellipsoid solved using CVXPY (SDP)', fontsize=13)
 plt.tight_layout()
 plt.show()
-
-

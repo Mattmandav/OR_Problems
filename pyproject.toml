@@ -1,7 +1,7 @@
 [project]
-name = "optimization_problems"
+name = "or-problems"
 version = "0.1.0"
-description = "Some optimisation problems implemented in Python and Gurobi"
+description = "Operational research and optimisation problems implemented in Python with Gurobi and CVXPY"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -12,5 +12,13 @@ dependencies = [
     "ipympl>=0.10.0",
     "matplotlib>=3.10.8",
     "networkx>=3.6.1",
+    "numpy>=2.0",
     "scipy>=1.17.0",
+]
+
+[dependency-groups]
+dev = [
+    "jupytext>=1.17",
+    "nbstripout>=0.8",
+    "pre-commit>=4.0",
 ]

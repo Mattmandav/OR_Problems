@@ -1,12 +1,37 @@
-# Chebyshev Centre of a Polyhedron
-## Required packages
+# %% [markdown]
+# # Chebyshev Centre of a Polyhedron
+#
+# Let $P$ be a polyhedron described as $P = \{x \in \mathbb{R}^n : a_i^Tx \leq b_i, i = 1,\dots,m\}$. The centre of the largest ball is called the Chebyshev centre of the polyhedron and this ball $B$ can be described as $B = \{x_c + u : ||u||_2 \leq r\}$.
+#
+# ## Problem description
+# The model variables are the following:
+# * $x_c \in \mathbb{R}^n$: Centre of the ball $B$.
+# * $r \in \mathbb{R}$: Radius of the ball $B$.
+#
+# The objective is:
+#
+# $\max r$,
+#
+# subject to:
+#
+# $a_i^Tx_c + r||a_i||_2 \leq b_i$.
+#
+# ## Required packages
+
+# %%
+# %matplotlib ipympl
 import numpy as np
 import gurobipy as gp
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull
 
-## Data generation
+
+# %% [markdown]
+# ## Data generation
+#
 # The following function generates a random polyhedron of dimension $n$.
+
+# %%
 def generate_polyhedron(
         n = 2,
         m = 5,
@@ -29,7 +54,11 @@ def generate_polyhedron(
 
     return A, b
 
+
+# %% [markdown]
 # The following code plots the data for either $n=2$ or $n=3$
+
+# %%
 def plot_polyhedron(
         A,
         b,
@@ -101,12 +130,18 @@ def plot_polyhedron(
 
     plt.tight_layout()
 
+
+# %% [markdown]
 # The following code previews the data
+
+# %%
 # Generate data
 dimension = 3
 halfspaces = 5
 [A,b] = generate_polyhedron(dimension, halfspaces, seed=2026)
 plot_polyhedron(A, b, x_c=None, r=0)
 
+# %% [markdown]
+# ## Centre finding
 
-
+# %%
